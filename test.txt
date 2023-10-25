@@ -1,0 +1,341 @@
+Case 1:
+1. start server
+2. start client x(the table should be sent from server to x)
+3. start client y(the table should be sent from server to x and y)
+4. start client z(the table should be sent from server to x and y and z)
+5. chat x->y, y->z, ... , x ->z (All combinations)
+6. dereg x
+7. chat y->x (message should be sent to server to be saved)
+8. chat z->x (same as above)
+9. reg x (x’s status has to be broadcasted to all the other clients, messages should be sent from server to x, and y, z should display delivery notification)
+10. x, y, z : exit
+
+Output 1:
+Server:
+python ChatApp.py -s 2475
+>>> [Server started at 127.0.0.1 on port 2475]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+>>> [ACK Sent.]
+[Start listening...]
+>>> [ACK sent.]
+[Start listening...]
+>>> [ACK sent.]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+
+c1 (x):
+python ChatApp.py -c c1 127.0.0.1 2475 2927
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+send c2 from c1
+>>> [Message received by c2.]
+>>> send c3 from c1
+>>> [Message received by c3.]
+>>> c2: from c2 
+>>> c3: from c3 
+dereg c1
+>>> [You are offline. Bye.]
+>>> reg
+>>> [Welcome back!]
+>>> [You have offline messages:]
+>>> c2: 2023-10-25 14:40:07 test offline msg 
+>>> c3: 2023-10-25 14:40:22 test offline msg from c3 
+>>> [Client table updated.]
+
+c2 (y):
+python ChatApp.py -c c2 localhost 2475 2928
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> c1: from c1 
+send c1 from c2
+>>> [Message received by c1.]
+>>> send c3 from c3 
+>>> [Message received by c3.]
+>>> c3: from c3 
+>>> [Client table updated.]
+send c1 test offline msg
+>>> [Offline message sent at 2023-10-25 14:40:07 received by the server and saved.]
+>>> [Client table updated.]
+>>> Offline Message sent at 2023-10-25 14:40:07 received by c1
+
+c3 (z):
+python ChatApp.py -c c3 localhost 2475 2929
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> c1: from c1 
+>>> c2: from c3 
+send c1 from c3
+>>> [Message received by c1.]
+>>> send c2 from c3
+>>> [Message received by c2.]
+>>> [Client table updated.]
+send c1 test offline msg from c3
+>>> [Offline message sent at 2023-10-25 14:40:22 received by the server and saved.]
+>>> [Client table updated.]
+>>> Offline Message sent at 2023-10-25 14:40:22 received by c1
+
+Case 2:
+1. start server
+2. start client x (the table should be sent from server to x )
+3. start client y (the table should be sent from server to x and y)
+4. start client z (broadcast updated table the same way as above)
+5. server exit
+6. dereg y (dereg will fail, y should make 5 attempts, printing each attempt, and then exit)
+7. send message x->z (should still work!!!)
+
+Outpute 2:
+Server:
+python ChatApp.py -s 2475
+>>> [Server started at 127.0.0.1 on port 2475]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+^C%   
+
+c1 (x):
+python ChatApp.py -c c1 127.0.0.1 2475 2927
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+send c3 hello from c1
+>>> [Message received by c3.]
+>>> c3: hi from c3 
+
+c2 (y):
+python ChatApp.py -c c2 localhost 2475 2928
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+dereg c2
+>>> [Message sent! 1 times. Retrying...]
+>>> [Message sent! 2 times. Retrying...]
+>>> [Message sent! 3 times. Retrying...]
+>>> [Message sent! 4 times. Retrying...]
+>>> [Message sent! 5 times. Retrying...]
+>>> [Server not responding.]
+>>> [Exiting...]
+
+c3 (z):
+python ChatApp.py -c c3 localhost 2475 2929
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> c1: hello from c1 
+send c1 hi from c3
+>>> [Message received by c1.]
+
+Case 3:
+1. start server
+2. start client x (the table should be sent from server to x )
+3. start client y (the table should be sent from server to x and y)
+4. start client z (the table should be sent from server to x , y and z)
+5. start client a (the table should be sent from server to x , y, z, and a)
+6. dereg a
+7. send group message from x (y, z receive messages immediately, stored as an offline message for a)
+8. send private message y->a (message should be sent to server to be saved).
+9. reg a (a’s status has to be broadcasted to all the other clients, both messages should be sent from server to a, and y should display the notification.)
+
+Output 3:
+Server:
+python ChatApp.py -s 2475
+>>> [Server started at 127.0.0.1 on port 2475]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [ASK Sent.]
+[Start listening...]
+>>> [ACK Sent.]
+>>> [Client c4 Joined Group g.]
+>>> [The current group chats info are: {'g': ['c4']}]
+[Start listening...]
+>>> [ACK Sent.]
+>>> [Client c3 Joined Group g.]
+>>> [The current group chats info are: {'g': ['c4', 'c3']}]
+[Start listening...]
+>>> [ACK Sent.]
+>>> [Client c2 Joined Group g.]
+>>> [The current group chats info are: {'g': ['c4', 'c3', 'c2']}]
+[Start listening...]
+>>> [ACK Sent.]
+>>> [Client c1 Joined Group g.]
+>>> [The current group chats info are: {'g': ['c4', 'c3', 'c2', 'c1']}]
+[Start listening...]
+>>> [Client table updated.]
+>>> [ACK Sent.]
+[Start listening...]
+>>> [Client c1 sent group message to group g, message is send_all Welcome from c1 ]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+>>> [Client c2 left group g]
+>>> [The current group chats info are: {'g': ['c4', 'c3', 'c1']}]
+>>> [ACK Sent.]
+[Start listening...]
+>>> [ACK sent.]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+
+c1 (x):
+python ChatApp.py -c c1 127.0.0.1 2475 2927
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+join_group g
+>>> [Entered group g successfully.]
+>>> (g) [Client table updated.]
+send_all Welcome from c1
+>>> (g) [Group message received by server.]
+>>> (g) [Client table updated.]
+>>> (g) Offline Message sent at 2023-10-25 15:05:22 received by c4
+
+c2 (y):
+python ChatApp.py -c c2 localhost 2475 2928
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+join_group g
+>>> [Entered group g successfully.]
+>>> (g) [Client table updated.]
+>>> (g) [Group Message c1: send_all Welcome from c1 ]
+leave_group
+>>> (g) [Leave group chat g.]
+>>> send c4 hello from c2
+>>> [Offline message sent at 2023-10-25 15:05:37 received by the server and saved.]
+>>> [Client table updated.]
+>>> Offline Message sent at 2023-10-25 15:05:37 received by c4
+
+c3 (z):
+python ChatApp.py -c c3 localhost 2475 2929
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+join_group g
+>>> [Entered group g successfully.]
+>>> (g) [Client table updated.]
+>>> (g) [Group Message c1: send_all Welcome from c1 ]
+>>> (g) [Client table updated.]
+
+
+c4 (a):
+python ChatApp.py -c c4 localhost 2475 2930
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> create_group g
+>>> [Group g created by Server.]
+>>> join_group g
+>>> [Entered group g successfully.]
+>>> (g) dereg c4
+>>> (g) [You are offline. Bye.]
+>>> (g) reg
+>>> (g) [Welcome back!]
+>>> (g) [You have offline messages:]
+>>> (g) Group Chat c1: 2023-10-25 15:05:22 send_all Welcome from c1 
+>>> (g) c2: 2023-10-25 15:05:37 hello from c2 
+>>> (g) [Client table updated.]
+
+Case 4:
+1. start server
+2. start client x (the table should be sent from server to x )
+3. start client y (the table should be sent from server to x and y)
+4. start client z (the table should be sent from server to x, y, z)
+5. dereg z
+6. send private message x->z
+7. send private message y->z 
+8. dereg x
+9. reg z (y should receive the ACK that the offline message has been sent to z while x should not)
+10. reg x (x should receive the ACK that the offline message has been sent to z)
+
+Output 4:
+Server:
+python ChatApp.py -s 2475
+>>> [Server started at 127.0.0.1 on port 2475]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+>>> [ACK Sent.]
+[Start listening...]
+>>> [ACK sent.]
+[Start listening...]
+>>> [ACK sent.]
+[Start listening...]
+>>> [Client table updated.]
+>>> [ACK Sent.]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+[Start listening...]
+
+c1 (x):
+python ChatApp.py -c c1 127.0.0.1 2475 2927
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+send c3 hi from c1
+>>> [Offline message sent at 2023-10-25 15:21:11 received by the server and saved.]
+>>> dereg c1
+>>> [You are offline. Bye.]
+>>> reg
+>>> [Welcome back!]
+>>> [You have offline messages:]
+>>> c3: 2023-10-25 15:21:30 Offline Message sent at 2023-10-25 15:21:11 received by c3
+>>> [Client table updated.]
+
+c2 (y):
+python ChatApp.py -c c2 localhost 2475 2928
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+send c3 hi from c2
+>>> [Offline message sent at 2023-10-25 15:21:19 received by the server and saved.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> Offline Message sent at 2023-10-25 15:21:19 received by c3
+>>> [Client table updated.]
+
+c3 (z):
+python ChatApp.py -c c3 localhost 2475 2929
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> dereg c3
+>>> [You are offline. Bye.]
+>>> reg
+>>> [Welcome back!]
+>>> [You have offline messages:]
+>>> c1: 2023-10-25 15:21:11 hi from c1 
+>>> c2: 2023-10-25 15:21:19 hi from c2 
+>>> [Client table updated.]
+>>> [Client table updated.]
+>>> Offline Message sent at 2023-10-25 15:21:30 received by c1
