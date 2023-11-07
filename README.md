@@ -786,3 +786,55 @@ python ChatApp.py -c c3 localhost 2475 2929
 >>> [Client table updated.]
 >>> Offline Message sent at 2023-10-25 15:21:30 received by c1
 ```
+
+
+
+### Case 5:
+
+```
+1. start server
+2. start client x (the table should be sent from server to x )
+3. try to dereg client y
+4. send private message x->x
+5. client x should receive the message
+```
+
+### Output 5:
+
+#### Server:
+
+```
+python ChatApp.py -s 2475
+>>> [Server started at 0.0.0.0 on port 2475]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+[Start listening...]
+>>> [Client table updated.]
+>>> [ACK Sent.]
+[Start listening...]
+[Start listening...]
+```
+
+### c1 (x):
+
+```
+python ChatApp.py -c c1 localhost 2475 2927
+>>> [Welcome, You are registered.]
+>>> [Client table updated.]
+>>> [Client table updated.]
+dereg c2
+>>> [Incorrect username!]
+>>> dereg c1
+>>> [You are offline. Bye.]
+>>> reg
+>>> [Welcome back!]
+>>> [Client table updated.]
+send c1 hello!
+>>> c1: hello! 
+>>> [Message received by c1.]
+```
+
+
+
